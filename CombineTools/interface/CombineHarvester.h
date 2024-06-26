@@ -21,6 +21,8 @@
 #include "CombineHarvester/CombineTools/interface/Utilities.h"
 #include "CombineHarvester/CombineTools/interface/HistMapping.h"
 
+#include <type_traits>
+
 
 namespace ch {
 
@@ -200,9 +202,10 @@ class CombineHarvester {
    * functions that return by reference, i.e. turning a type R& into a type R.
    */
   template <typename T,
-            typename R = typename std::decay<
-                typename std::result_of<T(Object const*)>::type>::type>
-  std::set<R> SetFromAll(T func);
+            typename R = std::decay_t<
+                std::invoke_result_t<T, Object const *>>>
+  std::set<R>
+  SetFromAll(T func);
 
   /**
    * Fill an std::set using only the Observation entries
@@ -210,8 +213,8 @@ class CombineHarvester {
    * \sa SetFromAll
    */
   template <typename T,
-            typename R = typename std::decay<
-                typename std::result_of<T(Observation const*)>::type>::type>
+            typename R = std::decay_t<
+                std::invoke_result_t<T, Observation const *>>>
   std::set<R> SetFromObs(T func);
 
   /**
@@ -220,8 +223,8 @@ class CombineHarvester {
    * \sa SetFromAll
    */
   template <typename T,
-            typename R = typename std::decay<
-                typename std::result_of<T(Process const*)>::type>::type>
+            typename R = std::decay_t<
+                std::invoke_result_t<T, Process const *>>>
   std::set<R> SetFromProcs(T func);
 
   /**
@@ -230,8 +233,8 @@ class CombineHarvester {
    * \sa SetFromAll
    */
   template <typename T,
-            typename R = typename std::decay<
-                typename std::result_of<T(Systematic const*)>::type>::type>
+            typename R = std::decay_t<
+                std::invoke_result_t<T, Systematic const *>>>
   std::set<R> SetFromSysts(T func);
   /**@}*/
 
@@ -483,6 +486,7 @@ class CombineHarvester {
 
   std::unordered_map<std::string, bool> flags_;
 
+public:
   struct AutoMCStatsSettings {
     double event_threshold;
     bool include_signal;
@@ -496,7 +500,7 @@ class CombineHarvester {
 
     AutoMCStatsSettings() : AutoMCStatsSettings(0.) {}
   };
-
+private:
   std::map<std::string, AutoMCStatsSettings> auto_stats_settings_;
   std::vector<std::string> post_lines_;
 
